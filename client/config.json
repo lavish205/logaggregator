@@ -1,0 +1,15 @@
+{
+  "client_name": "accounts_server",
+  "client_ip": "192.168.10.12",
+  "services":[
+    {
+      "name": "redis",
+      "file": "/var/log/redis/redis-server.log"
+    },
+    {
+      "name": "rabbitmq",
+      "file": "/var/log/rabbitmq/rabbit@hb.log"
+    }
+  ]
+
+}
