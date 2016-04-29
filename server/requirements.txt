@@ -1,0 +1,6 @@
+Jinja2
+pip
+tornado==4.1
+redis
+crypto
+pycrypto==2.3
