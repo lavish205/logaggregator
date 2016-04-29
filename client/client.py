@@ -5,53 +5,32 @@ import os
 import gevent
 import grequests
 from requests.exceptions import ConnectionError
-from gevent.queue import Queue, Empty
+from gevent.queue import Queue, Empty, Full
+from itertools import count
 
 tasks = Queue()
 
 
-def worker1():
-    """
-    Worker which will pop task from queue and complete it
-    :return: None
-    """
-    try:
-        print "worker running"
-        urls = ['http://localhost:8888/logs/']
-        while True:
-            print "getting task from queue worker 1"
-            task = tasks.get()
-            
-            rs = (grequests.post(u, data=task) for u in urls)
-            grequests.map(rs)
+class Worker(object):
+    _count = count(0)
 
-    except Empty:
-        print "empty"
-        pass
-    except ConnectionError:
-        tasks.put(task)
+    def __init__(self):
+        self.urls = ["http://127.0.0.1:8888/logs/"]
+        self.count = self._count.next()
 
+    def start(self):
+        print "worker %d running " % self.count
+        try:
+            while True:
+                print "got task from worker %d" % self.count
+                task = tasks.get()
 
-def worker2():
-    """
-    Worker which will pop task from queue and complete it
-    :return: None
-    """
-    try:
-        print "worker running"
-        urls = ['http://localhost:8888/test/']
-        while True:
-            print "getting task from queue worker 2"
-            task = tasks.get()
-
-            rs = (grequests.post(u, data=task) for u in urls)
-            grequests.map(rs)
-
-    except Empty:
-        print "empty"
-        pass
-    except ConnectionError:
-        tasks.put(task)
+                rs = (grequests.post(u, data=task) for u in self.urls)
+                grequests.map(rs)
+        except ConnectionError:
+            tasks.put(task)
+        except Empty:
+            logging.error("Queue is empty")
 
 
 def get_logs(service, client, client_ip):
@@ -80,7 +59,7 @@ def get_logs(service, client, client_ip):
                 gevent.sleep(1)
                 f_obj.seek(where)
             else:
-                # add task to queue
+                # Got new line in log file, adding it to queue
                 t = {
                     'data': line,
                     'service': service['name'],
@@ -88,11 +67,14 @@ def get_logs(service, client, client_ip):
                     'client_ip': client_ip
                 }
                 print "adding task to queue"
-                tasks.put(t)
+                tasks.put(t, block=False)
 
     except IOError as e:
         logging.error("log file not found")
         logging.error(e)
+
+    except Full:
+        logging.error("Queue is full, Out of memory")
 
 
 def main():
@@ -116,10 +98,12 @@ def main():
 
 
 if __name__ == '__main__':
+    w1 = Worker()
+    w2 = Worker()
     gevent.joinall([
         gevent.spawn(main),
-        gevent.spawn(worker1),
-        gevent.spawn(worker2)
+        gevent.spawn(w1.start),
+        gevent.spawn(w2.start)
     ])
 
 

@@ -1,5 +1,6 @@
 from tornado.httpserver import HTTPServer
 from tornado.ioloop import IOLoop
+from tornado.queues import Queue
 from tornado.web import Application
 from tornado.options import options
 from settings import settings
@@ -8,6 +9,7 @@ from logaggregator import urls
 
 class LogAggregator(Application):
     def __init__(self):
+        self.queue = Queue()
         Application.__init__(self, urls.url_patterns, **settings)
 
 
