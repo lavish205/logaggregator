@@ -5,9 +5,6 @@ define('debug', default=False, help='debug mode')
 options.parse_command_line()
 
 
-settings = {}
-
+settings = dict()
 settings['debug'] = True
-settings['cookie_secret'] = "your-cookie-secret"
-settings['xsrf_cookies'] = False
 

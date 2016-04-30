@@ -1,21 +1,20 @@
 __author__ = 'lavish'
-import logging
-from tornado.gen import coroutine
+from tornado import gen
 from tornado.web import RequestHandler
-# from tornado.queues import Queue
 from utils import writeObjToResponse, es_index, es
+import psutil
 
 
 class LogsHandler(RequestHandler):
     """
     Logs handler which will index logs and get the required logs
     """
-    @coroutine
+    @gen.coroutine
     def get(self, *args, **kwargs):
-        pass
+        service = self.get_query_argument('service')
         # es.search(index="logs", )
 
-    @coroutine
+    @gen.coroutine
     def post(self, *args, **kwargs):
         data = {
             'log': self.get_argument('data', None),
@@ -24,6 +23,21 @@ class LogsHandler(RequestHandler):
             'client_ip': self.get_argument('client_ip', None)
         }
         print data
-        # Queue.put(data)
-        # es_index(data)
-        self.finish()
+        es_index(data)
+
+
+class StatsHandler(RequestHandler):
+    """
+
+    """
+    def get(self, *args, **kwargs):
+        """
+
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        response = {
+            'cpu': psutil.cpu_percent(),
+            'memory': psutil.virtual_memory().percent
+        }
