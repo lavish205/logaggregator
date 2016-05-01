@@ -1,9 +1,11 @@
-__author__ = 'lavish'
+from __future__ import absolute_import
+import datetime
+import json
 from tornado import gen
 from tornado.web import RequestHandler
 from tornado.options import options
 from tornado.template import Loader, Template
-from .utils import writeObjToResponse, es_index, es
+from .utils import writeObjToResponse, es_index, search_log
 import psutil
 
 
@@ -13,8 +15,16 @@ class LogsHandler(RequestHandler):
     """
     @gen.coroutine
     def get(self, *args, **kwargs):
-        service = self.get_query_argument('service')
-        # es.search(index="logs", )
+        doc_type = self.get_query_argument('service', None)
+
+        query = self.get_query_argument('query', None)
+        context = search_log(doc_type, query)
+        templateRoot = options.TEMPLATE_ROOT
+        loader = Loader(templateRoot)
+        templateName = 'logs.html'
+        response = loader.load(templateName).generate(**context)
+        self.write(response)
+        self.finish()
 
     @gen.coroutine
     def post(self, *args, **kwargs):
@@ -22,10 +32,12 @@ class LogsHandler(RequestHandler):
             'log': self.get_argument('data', None),
             'service': self.get_argument('service', None),
             'client': self.get_argument('client', None),
-            'client_ip': self.get_argument('client_ip', None)
+            'client_ip': self.get_argument('client_ip', None),
+            'created_at': datetime.datetime.now()
         }
         print data
-        es_index(data)
+        if self.get_argument('data', None):
+            es_index(data)
 
 
 class StatsHandler(RequestHandler):

@@ -12,13 +12,68 @@ from tornado.httputil import url_concat
 from tornado.options import options
 
 es = Elasticsearch()
+INDEX = "logs"
 
 
 @coroutine
 def es_index(data):
-    index = "logs"
     doc_type = data.get('service')
-    es.index(index=index, doc_type=doc_type, body=data)
+    es.index(index=INDEX, doc_type=doc_type, body=data)
+
+
+def search_log(doc_type, query):
+    print doc_type,query
+    # if query and doc_type:
+    #     print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+    #     res = es.search(index=INDEX)
+    #     print "condition true>>>>>>>>>>>"
+    #     print res
+    if query:
+        body = {
+            "from": 0,
+            "size": 50,
+            "sort": [
+               {
+                  "created_at": {
+                     "order": "desc"
+                  }
+               }
+            ],
+            "query": {
+                "term": {
+                    "_all": "the"
+                }
+            }
+        }
+    else:
+        body = {
+            "from": 0,
+            "size": 50,
+            "sort": [
+               {
+                  "created_at": {
+                     "order": "desc"
+                  }
+               }
+            ]
+        }
+    if doc_type:
+        print "condition 1 true"
+        res = es.search(index="logs", doc_type=str(doc_type).strip(), body=body)
+    else:
+        res = es.search(index="logs", body=body)
+
+    data = []
+    if not res.get('timed_out'):
+        for item in res["hits"]["hits"]:
+            data.append({
+                'client_ip': item['_source'].get('client_ip'),
+                'client': item['_source'].get('client'),
+                'log': item['_source'].get('log'),
+                'service': item['_source'].get('service'),
+            })
+    response = {"data": data}
+    return response
 
 
 @coroutine

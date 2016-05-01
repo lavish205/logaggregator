@@ -19,58 +19,30 @@
 </head>
 <body>
 	<header>
-		<h2 align="center">System Statistics</h2>
+		<h2 align="center">Log Aggregator</h2>
 	</header><!-- /header -->
 	<hr>
 	<div class="container-fluid">
 		<div class="row">
 			<div class="col-md-offset-1 col-md-10 clearfix" align="center">
-				<h3 class="pull-left">Cpu Statistics</h3>
-				<table class="table">
+				<table class="table table-striped">
 					<thead>
 						<tr>
-							<th>User</th>
-							<th>System</th>
-							<th>Idle</th>
-							<th>IOwait</th>
-							<th>usage</th>
+							<th>Client</th>
+							<th>Client IP</th>
+							<th>Service</th>
+							<th>Log</th>
 						</tr>
 					</thead>
 					<tbody>
-						<tr>
-							<td>{{ cpu['user'] }}</td>
-							<td>{{ cpu['system'] }}</td>
-							<td>{{ cpu['idle'] }}</td>
-							<td>{{ cpu['iowait'] }}</td>
-							<td>{{ cpu['usage'] }}</td>
-						</tr>
-					</tbody>
-				</table>
-			</div>
-		</div>
-		<div class="row">
-			<div class="col-md-offset-1 col-md-10 clearfix" align="center">
-				<h3 class="pull-left">Memory Statistics</h3>
-				<table class="table">
-					<thead>
-						<tr>
-							<th>Total</th>
-							<th>Available</th>
-							<th>Used</th>
-							<th>Free</th>
-							<th>Percentage</th>
-							<th>Cached</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr>
-							<td>{{ memory['total'] }}</td>
-							<td>{{ memory['available'] }}</td>
-							<td>{{ memory['used'] }}</td>
-							<td>{{ memory['free'] }}</td>
-							<td>{{ memory['percent'] }}</td>
-							<td>{{ memory['cached'] }}</td>
-						</tr>
+						{% for i in data %}
+							<tr>
+								<td>{{ i['client'] }}</td>
+								<td>{{ i['client_ip'] }}</td>
+								<td>{{ i['service'] }}</td>
+								<td>{{ i['log'] }}</td>
+							</tr>
+						{% end %}
 					</tbody>
 				</table>
 			</div>
