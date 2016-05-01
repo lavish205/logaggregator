@@ -19,7 +19,7 @@ class Worker(object):
 
     def __init__(self):
         # setting url of the server where logs will be shipped
-        self.urls = ["http://127.0.0.1:8888/logs/"]
+        self.urls = [os.getenv('SERVER_IP', 'http://127.0.0.1:8888/logs/')]
         self.count = self._count.next()  # counts of number of worker
 
     def start(self):
@@ -32,7 +32,6 @@ class Worker(object):
             while True:
                 print "got task from worker %d" % self.count
                 task = tasks.get()
-
                 rs = (grequests.post(u, data=task) for u in self.urls)
                 grequests.map(rs)
         except ConnectionError:
