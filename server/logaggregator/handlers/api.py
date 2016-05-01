@@ -1,12 +1,12 @@
 from __future__ import absolute_import
 import datetime
-import json
 from tornado import gen
-from tornado.web import RequestHandler
+from tornado.escape import json_encode
 from tornado.options import options
 from tornado.template import Loader, Template
-from .utils import writeObjToResponse, es_index, search_log
+from tornado.web import RequestHandler
 import psutil
+from .utils import writeObjToResponse, es_index, search_log
 
 
 class LogsHandler(RequestHandler):
@@ -23,7 +23,7 @@ class LogsHandler(RequestHandler):
         loader = Loader(templateRoot)
         templateName = 'logs.html'
         response = loader.load(templateName).generate(**context)
-        self.write(response)
+        writeObjToResponse(self, object=context, status=200)
         self.finish()
 
     @gen.coroutine
