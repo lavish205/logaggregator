@@ -25,7 +25,7 @@ Ex:
 
 }
 ```
-* Set Enviornment variable "SERVER_IP" as ip of the centeralize server
+* Set Enviornment variable "SERVER_IP" as http://<server_ip>:8888/logs/
 * Run `client.py`
 > $ python client.py
 
