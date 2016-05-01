@@ -11,8 +11,8 @@
       "file": "/var/log/rabbitmq/rabbit@hb.log"
     },
     {
-      "name": "mongodb",
-      "file": "/var/log/mongodb/mongodb.log"
+      "name": "mysql",
+      "file": "/var/log/mysql/error.log"
     }
   ]
 

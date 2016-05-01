@@ -25,7 +25,8 @@ class LogsHandler(RequestHandler):
         loader = Loader(templateRoot)
         templateName = 'logs.html'
         response = loader.load(templateName).generate(**context)
-        writeObjToResponse(self, object=context, status=200)
+        # writeObjToResponse(self, object=context, status=200)
+        self.write(response)
         self.finish()
 
     @gen.coroutine
