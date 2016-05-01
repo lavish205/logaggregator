@@ -1,7 +1,9 @@
 __author__ = 'lavish'
 from tornado import gen
 from tornado.web import RequestHandler
-from utils import writeObjToResponse, es_index, es
+from tornado.options import options
+from tornado.template import Loader, Template
+from .utils import writeObjToResponse, es_index, es
 import psutil
 
 
@@ -37,7 +39,26 @@ class StatsHandler(RequestHandler):
         :param kwargs:
         :return:
         """
-        response = {
-            'cpu': psutil.cpu_percent(),
-            'memory': psutil.virtual_memory().percent
+        context = {
+            'cpu': {
+                'user': psutil.cpu_times_percent().user,
+                'system': psutil.cpu_times_percent().system,
+                'idle': psutil.cpu_times_percent().idle,
+                'iowait': psutil.cpu_times_percent().iowait,
+                'usage': psutil.cpu_percent()
+            },
+            'memory': {
+                'percent': psutil.virtual_memory().percent,
+                'total': psutil.virtual_memory().total,
+                'available': psutil.virtual_memory().available,
+                'used': psutil.virtual_memory().used,
+                'free': psutil.virtual_memory().free,
+                'cached': psutil.virtual_memory().cached
+            }
         }
+        templateRoot = options.TEMPLATE_ROOT
+        loader = Loader(templateRoot)
+        templateName = 'stats.html'
+        response = loader.load(templateName).generate(**context)
+        self.write(response)
+        self.finish()
