@@ -1,20 +1,22 @@
 from __future__ import absolute_import
 import datetime
-from tornado import gen
-from tornado.escape import json_encode
-from tornado.options import options
-from tornado.template import Loader, Template
-from tornado.web import RequestHandler
 import psutil
+from tornado import gen
+from tornado.options import options
+from tornado.template import Loader
+from tornado.web import RequestHandler
 from .utils import writeObjToResponse, es_index, search_log
 
 
 class LogsHandler(RequestHandler):
     """
-    Logs handler which will index logs and get the required logs
+    API endpoint providing streaming of indexed logs
     """
     @gen.coroutine
     def get(self, *args, **kwargs):
+        """
+        view logs that are indexed into elastic search
+        """
         doc_type = self.get_query_argument('service', None)
 
         query = self.get_query_argument('query', None)
@@ -28,6 +30,9 @@ class LogsHandler(RequestHandler):
 
     @gen.coroutine
     def post(self, *args, **kwargs):
+        """
+        index requested log to elasticsearch
+        """
         data = {
             'log': self.get_argument('data', None),
             'service': self.get_argument('service', None),
@@ -42,14 +47,11 @@ class LogsHandler(RequestHandler):
 
 class StatsHandler(RequestHandler):
     """
-
+    API endpoint providing statistics of system
     """
     def get(self, *args, **kwargs):
         """
-
-        :param args:
-        :param kwargs:
-        :return:
+        provide details of cpu and memory usage
         """
         context = {
             'cpu': {

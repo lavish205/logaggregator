@@ -1,4 +1,4 @@
-__author__ = 'lavish'
+from __future__ import absolute_import
 from handlers.api import *
 
 url_patterns = [
