@@ -1,24 +1,32 @@
-
+import gevent
+import grequests
 import json
 import logging
 import os
-import gevent
-import grequests
-from requests.exceptions import ConnectionError
-from gevent.queue import Queue, Empty, Full
 from itertools import count
+from gevent.queue import Queue, Empty, Full
+from requests.exceptions import ConnectionError
 
+# creating a global queue to add all the tasks
 tasks = Queue()
 
 
 class Worker(object):
+    """
+    Worker which will pop task from queue and complete it
+    """
     _count = count(0)
 
     def __init__(self):
+        # setting url of the server where logs will be shipped
         self.urls = ["http://127.0.0.1:8888/logs/"]
-        self.count = self._count.next()
+        self.count = self._count.next()  # counts of number of worker
 
     def start(self):
+        """
+        starts poping task from queue and complete it
+        :return:
+        """
         print "worker %d running " % self.count
         try:
             while True:
@@ -88,6 +96,7 @@ def main():
         client_ip = config.get('client_ip')
 
         req = []
+        # getting all services from config file
         for service in config.get('services', []):
             req.append(gevent.spawn(get_logs, service, client, client_ip))
         gevent.joinall(req)
@@ -98,8 +107,10 @@ def main():
 
 
 if __name__ == '__main__':
+    # initializing two workers
     w1 = Worker()
     w2 = Worker()
+    # spawning all tasks
     gevent.joinall([
         gevent.spawn(main),
         gevent.spawn(w1.start),
